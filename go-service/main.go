@@ -6,6 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Address struct {
+	City   string `json:"city" binding:"required"`
+	Street string `json:"street" binding:"required"`
+}
+
+type User struct {
+	ID      int     `json:"id" binding:"required"`
+	Name    string  `json:"name" binding:"required"`
+	Email   string  `json:"email" binding:"required,email"`
+	Address Address `json:"address" binding:"required"`
+}
+
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -15,12 +27,15 @@ func main() {
 	})
 
 	router.GET("/api/users", func(c *gin.Context) {
-		users := []string{"Alice", "Bob", "Charlie"}
+		users := []User{
+			{ID: 1, Name: "Alice", Email: "alice@example.com", Address: Address{City: "Moscow", Street: "Tverskaya"}},
+			{ID: 2, Name: "Bob", Email: "bob@example.com", Address: Address{City: "Saint Petersburg", Street: "Nevsky"}},
+		}
 		c.JSON(http.StatusOK, users)
 	})
 
 	router.POST("/api/users", func(c *gin.Context) {
-		var user map[string]interface{}
+		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
