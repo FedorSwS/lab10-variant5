@@ -1,0 +1,16 @@
+syntax = "proto3";
+package data;
+option go_package = "lab10-variant5/go-service/proto";
+
+service DataService {
+  rpc ProcessData (DataRequest) returns (DataResponse);
+}
+
+message DataRequest {
+  string payload = 1;
+}
+
+message DataResponse {
+  string result = 1;
+  int32 status_code = 2;
+}
