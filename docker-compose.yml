@@ -1,0 +1,41 @@
+services:
+  go-service:
+    build:
+      context: ./go-service
+      dockerfile: Dockerfile
+    container_name: go-service
+    ports:
+      - "8080:8080"
+    networks:
+      - lab10-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  py-service:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile
+    container_name: py-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - go-service
+    networks:
+      - lab10-network
+    environment:
+      - GO_SERVICE_URL=http://go-service:8080
+      - GO_GRPC_URL=go-service:50051
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  lab10-network:
+    driver: bridge
