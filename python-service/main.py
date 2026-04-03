@@ -1,6 +1,9 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import httpx
+import signal
+import sys
 
 GO_SERVICE_URL = "http://go-service:8080"
 
@@ -14,7 +17,11 @@ class User(BaseModel):
     email: str
     address: Address
 
-app = FastAPI(title="Python FastAPI Proxy Service")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+
+app = FastAPI(title="Python FastAPI Proxy Service", lifespan=lifespan)
 
 @app.post("/api/forward-user", response_model=User)
 async def forward_user(user: User):
